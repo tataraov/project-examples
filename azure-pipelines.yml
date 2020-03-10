@@ -17,7 +17,7 @@ steps:
     jdkArchitectureOption: 'x64'
 - task: ArtifactoryGenericUpload@1
   inputs:
-    artifactoryService: 'Artifactory_saas'
+    artifactoryService: 'Artifactory'
     specSource: 'taskConfiguration'
     fileSpec: |
       {
@@ -31,6 +31,16 @@ steps:
     collectBuildInfo: true
 - task: ArtifactoryPublishBuildInfo@1
   inputs:
-    artifactoryService: 'Artifactory_saas'
+    artifactoryService: 'Artifactory'
     buildName: '$(Build.DefinitionName)'
     buildNumber: '$(Build.BuildNumber)'
+- task: ArtifactoryXrayScan@1
+  inputs:
+    artifactoryService: 'Artifactory'
+    buildName: '$(Build.DefinitionName)'
+    buildNumber: '$(Build.BuildNumber)'
+    allowFailBuild: true
+    buildName: '$(Build.DefinitionName)'
+    buildNumber: '$(Build.BuildNumber)'
+    failNoOp: true
+    tasks: 'build'

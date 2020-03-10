@@ -1,0 +1,46 @@
+# Gradle
+# Build your Java project and run tests with Gradle using a Gradle wrapper script.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+trigger:
+- master
+pool:
+  vmImage: 'ubuntu-latest'
+steps:
+- task: Gradle@2
+  inputs:
+    workingDirectory: ''
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+- task: ArtifactoryGenericUpload@1
+  inputs:
+    artifactoryService: 'Artifactory_saas'
+    specSource: 'taskConfiguration'
+    fileSpec: |
+      {
+        "files": [
+          {
+            "pattern": "target/*",
+            "target": "libs-snapshot-local/"
+          }
+        ]
+      }
+    collectBuildInfo: true
+- task: ArtifactoryPublishBuildInfo@1
+  inputs:
+    artifactoryService: 'Artifactory_saas'
+    buildName: '$(Build.DefinitionName)'
+    buildNumber: '$(Build.BuildNumber)'
+- task: ArtifactoryXrayScan@1
+  inputs:
+    artifactoryService: 'Artifactory_saas'
+    buildName: '$(Build.DefinitionName)'
+    buildNumber: '$(Build.BuildNumber)'
+    allowFailBuild: true
+    buildName: '$(Build.DefinitionName)'
+    buildNumber: '$(Build.BuildNumber)'
+    failNoOp: true
+    tasks: 'build'
